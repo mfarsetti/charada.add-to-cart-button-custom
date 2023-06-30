@@ -14,9 +14,7 @@ import { useProductDispatch } from 'vtex.product-context'
 import { usePWA } from 'vtex.store-resources/PWAContext'
 import { useOrderItems } from 'vtex.order-items/OrderItems'
 import { useOrderForm } from 'vtex.order-manager/OrderForm'
-// import { useMutation } from 'react-apollo'
 
-// import UPDATE_ITEMS from './graphQL/updateitems.gql'
 import { CartItem } from './modules/catalogItemToCart'
 import useMarketingSessionParams from './hooks/useMarketingSessionParams'
 
@@ -108,7 +106,7 @@ const mapSkuItemForPixelEvent = (skuItem: CartItem) => {
 }
 
 function getSessionStorage(sessionId: string) {
-  sessionStorage.setItem(sessionId)
+  sessionStorage.getItem(sessionId)
 }
 
 function AddToCartButton(props: Props) {
@@ -146,7 +144,6 @@ function AddToCartButton(props: Props) {
   const { orderForm } = useOrderForm()
   const translateMessage = (message: MessageDescriptor) =>
     intl.formatMessage(message)
-  // const [updateItems] = useMutation(UPDATE_ITEMS)
   const itemIndex = orderForm.items.findIndex(
     (item: any) => item.id === skuItems[0].id
   )
@@ -176,7 +173,7 @@ function AddToCartButton(props: Props) {
 
   useEffect(() => {
     const attachmentParams = getSessionStorage('Bordado')
-    // eslint-disable-next-line vtex/prefer-early-return
+
     if (itemIndex >= 0) {
       fetch(
         `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
