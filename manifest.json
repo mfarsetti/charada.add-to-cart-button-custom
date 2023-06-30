@@ -1,7 +1,7 @@
 {
   "vendor": "charada",
   "name": "add-to-cart-button-custom",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "title": "Add to Cart Button",
   "description": "A button component to add items into the shopping cart.",
   "builders": {
