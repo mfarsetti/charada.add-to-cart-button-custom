@@ -20,7 +20,8 @@
     "vtex.product-context": "0.x",
     "vtex.pixel-manager": "1.x",
     "vtex.store-resources": "0.x",
-    "vtex.native-types": "0.x"
+    "vtex.native-types": "0.x",
+    "vtex.add-to-cart-button": "0.x"
   },
   "registries": [
     "smartcheckout"
