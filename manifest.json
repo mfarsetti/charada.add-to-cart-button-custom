@@ -1,7 +1,7 @@
 {
-  "vendor": "vtex",
-  "name": "add-to-cart-button",
-  "version": "0.30.1",
+  "vendor": "charada",
+  "name": "add-to-cart-button-custom",
+  "version": "0.0.0",
   "title": "Add to Cart Button",
   "description": "A button component to add items into the shopping cart.",
   "builders": {
@@ -16,14 +16,13 @@
     "vtex.order-manager": "0.x",
     "vtex.order-items": "0.x",
     "vtex.checkout-resources": "0.x",
+    "vtex.checkout-graphql": "0.x",
     "vtex.product-context": "0.x",
     "vtex.pixel-manager": "1.x",
     "vtex.store-resources": "0.x",
     "vtex.native-types": "0.x"
   },
-  "registries": [
-    "smartcheckout"
-  ],
+  "registries": ["smartcheckout"],
   "policies": [],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }

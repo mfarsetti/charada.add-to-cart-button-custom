@@ -41,5 +41,8 @@
   "intl-equalizer": {
     "referenceLocale": "en",
     "localeDirectory": "messages"
+  },
+  "dependencies": {
+    "react-apollo": "^3.1.5"
   }
 }

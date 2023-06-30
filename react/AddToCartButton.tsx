@@ -13,7 +13,10 @@ import { usePixel } from 'vtex.pixel-manager'
 import { useProductDispatch } from 'vtex.product-context'
 import { usePWA } from 'vtex.store-resources/PWAContext'
 import { useOrderItems } from 'vtex.order-items/OrderItems'
+import { useOrderForm } from 'vtex.order-manager/OrderForm'
+// import { useMutation } from 'react-apollo'
 
+// import UPDATE_ITEMS from './graphQL/updateitems.gql'
 import { CartItem } from './modules/catalogItemToCart'
 import useMarketingSessionParams from './hooks/useMarketingSessionParams'
 
@@ -104,6 +107,10 @@ const mapSkuItemForPixelEvent = (skuItem: CartItem) => {
   }
 }
 
+function getSessionStorage(sessionId: string) {
+  sessionStorage.setItem(sessionId)
+}
+
 function AddToCartButton(props: Props) {
   const {
     text,
@@ -136,8 +143,13 @@ function AddToCartButton(props: Props) {
   const { promptOnCustomEvent } = settings
   const { utmParams, utmiParams } = useMarketingSessionParams()
   const [isFakeLoading, setFakeLoading] = useState(false)
+  const { orderForm } = useOrderForm()
   const translateMessage = (message: MessageDescriptor) =>
     intl.formatMessage(message)
+  // const [updateItems] = useMutation(UPDATE_ITEMS)
+  const itemIndex = orderForm.items.findIndex(
+    (item: any) => item.id === skuItems[0].id
+  )
 
   // collect toast and fake loading delay timers
   const timers = useRef<Record<string, number | undefined>>({})
@@ -161,6 +173,49 @@ function AddToCartButton(props: Props) {
       )
     }
   }, [isFakeLoading, isOneClickBuy])
+
+  useEffect(() => {
+    const attachmentParams = getSessionStorage('Bordado')
+    // eslint-disable-next-line vtex/prefer-early-return
+    if (itemIndex >= 0) {
+      fetch(
+        `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: {
+              Personalizacao: attachmentParams,
+            },
+            expectedOrderFormSections: [
+              'items',
+              'totalizers',
+              'clientProfileData',
+              'shippingData',
+              'paymentData',
+              'sellers',
+              'messages',
+              'marketingData',
+              'clientPreferencesData',
+              'storePreferencesData',
+              'giftRegistryData',
+              'ratesAndBenefitsData',
+              'openTextField',
+              'commercialConditionData',
+              'customData',
+            ],
+            noSplitItem: true,
+          }),
+        }
+      )
+        .then(response => response.json())
+        .then(data => {
+          // eslint-disable-next-line no-console
+          console.log('Resposta Pós Attachment', data)
+        })
+        .catch(err => console.error(err))
+    }
+  }, [itemIndex, orderForm.id])
 
   const resolveToastMessage = (success: boolean) => {
     if (!success) return translateMessage(messages.error)
