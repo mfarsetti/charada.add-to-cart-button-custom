@@ -15,6 +15,8 @@ import { usePWA } from 'vtex.store-resources/PWAContext'
 import { useOrderItems } from 'vtex.order-items/OrderItems'
 import { useOrderForm } from 'vtex.order-manager/OrderForm'
 
+import { useProduct } from 'vtex.product-context'
+
 import { CartItem } from './modules/catalogItemToCart'
 import useMarketingSessionParams from './hooks/useMarketingSessionParams'
 
@@ -105,9 +107,9 @@ const mapSkuItemForPixelEvent = (skuItem: CartItem) => {
   }
 }
 
-function getSessionStorage(sessionId: string) {
-  sessionStorage.getItem(sessionId)
-}
+// function getSessionStorage(sessionId: string) {
+//   sessionStorage.getItem(sessionId)
+// }
 
 function AddToCartButton(props: Props) {
   const {
@@ -134,6 +136,7 @@ function AddToCartButton(props: Props) {
   const handles = useCssHandles(CSS_HANDLES)
   const { addItems } = useOrderItems()
   const productContextDispatch = useProductDispatch()
+  const productContext = useProduct()
   const { rootPath = '', navigate } = useRuntime()
   const { url: checkoutURL, major } = Utils.useCheckoutURL()
   const { push } = usePixel()
@@ -144,9 +147,13 @@ function AddToCartButton(props: Props) {
   const { orderForm } = useOrderForm()
   const translateMessage = (message: MessageDescriptor) =>
     intl.formatMessage(message)
+
+  //TODO: Maybe this will not work as expected  
   const itemIndex = orderForm.items.findIndex(
     (item: any) => item.id === skuItems[0].id
   )
+
+  console.log(productContext, 'productContext')
 
   // collect toast and fake loading delay timers
   const timers = useRef<Record<string, number | undefined>>({})
@@ -171,48 +178,6 @@ function AddToCartButton(props: Props) {
     }
   }, [isFakeLoading, isOneClickBuy])
 
-  useEffect(() => {
-    const attachmentParams = getSessionStorage('Bordado')
-
-    if (itemIndex >= 0) {
-      fetch(
-        `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: {
-              Personalizacao: attachmentParams,
-            },
-            expectedOrderFormSections: [
-              'items',
-              'totalizers',
-              'clientProfileData',
-              'shippingData',
-              'paymentData',
-              'sellers',
-              'messages',
-              'marketingData',
-              'clientPreferencesData',
-              'storePreferencesData',
-              'giftRegistryData',
-              'ratesAndBenefitsData',
-              'openTextField',
-              'commercialConditionData',
-              'customData',
-            ],
-            noSplitItem: true,
-          }),
-        }
-      )
-        .then(response => response.json())
-        .then(data => {
-          // eslint-disable-next-line no-console
-          console.log('Resposta Pós Attachment', data)
-        })
-        .catch(err => console.error(err))
-    }
-  }, [itemIndex, orderForm.id])
 
   const resolveToastMessage = (success: boolean) => {
     if (!success) return translateMessage(messages.error)
@@ -260,14 +225,14 @@ function AddToCartButton(props: Props) {
     const pixelEvent =
       customPixelEventId && addToCartFeedback === 'customEvent'
         ? {
-            id: customPixelEventId,
-            event: 'addToCart',
-            items: pixelEventItems,
-          }
+          id: customPixelEventId,
+          event: 'addToCart',
+          items: pixelEventItems,
+        }
         : {
-            event: 'addToCart',
-            items: pixelEventItems,
-          }
+          event: 'addToCart',
+          items: pixelEventItems,
+        }
 
     // @ts-expect-error the event is not typed in pixel-manager
     push(pixelEvent)
@@ -298,7 +263,56 @@ function AddToCartButton(props: Props) {
     }
   }
 
+
+
+
   const handleClick = (e: React.MouseEvent) => {
+
+    const attachmentParams = sessionStorage.getItem('Bordado')
+
+    /* @ts-ignore */
+    const haveAttachment = productContext?.selectedItem?.attachments?.find(item => item.name === "Bordado")
+
+    if (attachmentParams && haveAttachment) {
+
+      fetch(
+        `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: {
+              Personalizacao: attachmentParams,
+            },
+            expectedOrderFormSections: [
+              'items',
+              'totalizers',
+              'clientProfileData',
+              'shippingData',
+              'paymentData',
+              'sellers',
+              'messages',
+              'marketingData',
+              'clientPreferencesData',
+              'storePreferencesData',
+              'giftRegistryData',
+              'ratesAndBenefitsData',
+              'openTextField',
+              'commercialConditionData',
+              'customData',
+            ],
+            noSplitItem: true,
+          }),
+        }
+      )
+        .then(response => response.json())
+        .then(data => {
+          // eslint-disable-next-line no-console
+          console.log('Resposta Pós Attachment', data)
+        })
+        .catch(err => console.error(err))
+    }
+
     if (productContextDispatch) {
       productContextDispatch({
         type: 'SET_BUY_BUTTON_CLICKED',
@@ -314,6 +328,8 @@ function AddToCartButton(props: Props) {
     if (allSkuVariationsSelected) {
       handleAddToCart()
     }
+
+
   }
 
   /*
