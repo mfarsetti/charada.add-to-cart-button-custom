@@ -260,24 +260,19 @@ function AddToCartButton(props: Props) {
     }
   }
 
-
-
-
-  const handleClick = (e: React.MouseEvent) => {
-
+  useEffect(() => {
     const attachmentParams = sessionStorage.getItem('Bordado')
 
     /* @ts-ignore */
     const haveAttachment = productContext?.selectedItem?.attachments?.find(item => item.name === "Bordado")
 
     if (attachmentParams && haveAttachment) {
-      setTimeout(() => {
-        //TODO: Maybe this will not work as expected  
-        const itemIndex = orderForm.items.findIndex(
-          (item: any) => item.id === skuItems[0].id
-        )
+      //TODO: Maybe this will not work as expected  
+      const itemIndex = orderForm.items.findIndex(
+        (item: any) => item.id === skuItems[0].id
+      )
 
-
+      if (itemIndex) {
         fetch(
           `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
           {
@@ -314,8 +309,16 @@ function AddToCartButton(props: Props) {
             console.log('Resposta Pós Attachment', data)
           })
           .catch(err => console.error(err))
-      }, 2000)
+      }
+
+
     }
+  }, [orderForm])
+
+
+
+
+  const handleClick = (e: React.MouseEvent) => {
 
     if (productContextDispatch) {
       productContextDispatch({
