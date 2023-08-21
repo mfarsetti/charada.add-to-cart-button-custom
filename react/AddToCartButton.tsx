@@ -148,10 +148,7 @@ function AddToCartButton(props: Props) {
   const translateMessage = (message: MessageDescriptor) =>
     intl.formatMessage(message)
 
-  //TODO: Maybe this will not work as expected  
-  const itemIndex = orderForm.items.findIndex(
-    (item: any) => item.id === skuItems[0].id
-  )
+
 
   console.log(productContext, 'productContext')
 
@@ -275,6 +272,12 @@ function AddToCartButton(props: Props) {
 
     if (attachmentParams && haveAttachment) {
       setTimeout(() => {
+        //TODO: Maybe this will not work as expected  
+        const itemIndex = orderForm.items.findIndex(
+          (item: any) => item.id === skuItems[0].id
+        )
+
+
         fetch(
           `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
           {
