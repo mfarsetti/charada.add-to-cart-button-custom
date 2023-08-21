@@ -274,43 +274,44 @@ function AddToCartButton(props: Props) {
     const haveAttachment = productContext?.selectedItem?.attachments?.find(item => item.name === "Bordado")
 
     if (attachmentParams && haveAttachment) {
-
-      fetch(
-        `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: {
-              Personalizacao: attachmentParams,
-            },
-            expectedOrderFormSections: [
-              'items',
-              'totalizers',
-              'clientProfileData',
-              'shippingData',
-              'paymentData',
-              'sellers',
-              'messages',
-              'marketingData',
-              'clientPreferencesData',
-              'storePreferencesData',
-              'giftRegistryData',
-              'ratesAndBenefitsData',
-              'openTextField',
-              'commercialConditionData',
-              'customData',
-            ],
-            noSplitItem: true,
-          }),
-        }
-      )
-        .then(response => response.json())
-        .then(data => {
-          // eslint-disable-next-line no-console
-          console.log('Resposta Pós Attachment', data)
-        })
-        .catch(err => console.error(err))
+      setTimeout(() => {
+        fetch(
+          `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: {
+                Personalizacao: attachmentParams,
+              },
+              expectedOrderFormSections: [
+                'items',
+                'totalizers',
+                'clientProfileData',
+                'shippingData',
+                'paymentData',
+                'sellers',
+                'messages',
+                'marketingData',
+                'clientPreferencesData',
+                'storePreferencesData',
+                'giftRegistryData',
+                'ratesAndBenefitsData',
+                'openTextField',
+                'commercialConditionData',
+                'customData',
+              ],
+              noSplitItem: true,
+            }),
+          }
+        )
+          .then(response => response.json())
+          .then(data => {
+            // eslint-disable-next-line no-console
+            console.log('Resposta Pós Attachment', data)
+          })
+          .catch(err => console.error(err))
+      }, 2000)
     }
 
     if (productContextDispatch) {
