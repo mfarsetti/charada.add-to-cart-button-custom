@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
   FormattedMessage,
   MessageDescriptor,
@@ -258,64 +258,8 @@ function AddToCartButton(props: Props) {
     if (promptOnCustomEvent === 'addToCart' && showInstallPrompt) {
       showInstallPrompt()
     }
+
   }
-
-  useEffect(() => {
-    const attachmentParams = sessionStorage.getItem('Bordado')
-
-    /* @ts-ignore */
-    const haveAttachment = productContext?.selectedItem?.attachments?.find(item => item.name === "Bordado")
-
-    if (attachmentParams && haveAttachment) {
-      //TODO: Maybe this will not work as expected  
-      const itemIndex = orderForm.items.findIndex(
-        (item: any) => item.id === skuItems[0].id
-      )
-
-      if (itemIndex) {
-        fetch(
-          `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              content: {
-                Personalizacao: attachmentParams,
-              },
-              expectedOrderFormSections: [
-                'items',
-                'totalizers',
-                'clientProfileData',
-                'shippingData',
-                'paymentData',
-                'sellers',
-                'messages',
-                'marketingData',
-                'clientPreferencesData',
-                'storePreferencesData',
-                'giftRegistryData',
-                'ratesAndBenefitsData',
-                'openTextField',
-                'commercialConditionData',
-                'customData',
-              ],
-              noSplitItem: true,
-            }),
-          }
-        )
-          .then(response => response.json())
-          .then(data => {
-            // eslint-disable-next-line no-console
-            console.log('Resposta Pós Attachment', data)
-          })
-          .catch(err => console.error(err))
-      }
-
-
-    }
-  }, [orderForm])
-
-
 
 
   const handleClick = (e: React.MouseEvent) => {
@@ -335,9 +279,66 @@ function AddToCartButton(props: Props) {
     if (allSkuVariationsSelected) {
       handleAddToCart()
     }
-
-
   }
+
+  useEffect(() => {
+    handleAttachment()
+    console.log('Attachment Executado', orderForm)
+  }, [orderForm.items])
+
+  const handleAttachment = useCallback(async () => {
+    const attachmentParams = sessionStorage.getItem('Bordado')
+
+    //TODO: Maybe this will not work as expected  
+    const itemIndex = orderForm.items.findIndex(
+      (item: any) => item.id === skuItems[0].id
+    )
+
+    /* @ts-ignore */
+    const haveAttachment = productContext?.selectedItem?.attachments?.find(item => item.name === "Bordado")
+
+    console.log(orderForm.items[itemIndex], 'orderForm.items[itemIndex]')
+
+    if (attachmentParams && haveAttachment) {
+      fetch(
+        `/api/checkout/pub/orderForm/${orderForm.id}/items/${itemIndex}/attachments/Bordado`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: {
+              Personalizacao: attachmentParams,
+            },
+            expectedOrderFormSections: [
+              'items',
+              'totalizers',
+              'clientProfileData',
+              'shippingData',
+              'paymentData',
+              'sellers',
+              'messages',
+              'marketingData',
+              'clientPreferencesData',
+              'storePreferencesData',
+              'giftRegistryData',
+              'ratesAndBenefitsData',
+              'openTextField',
+              'commercialConditionData',
+              'customData',
+            ],
+            noSplitItem: true,
+          }),
+        }
+      )
+        .then(response => response.json())
+        .then(data => {
+          // eslint-disable-next-line no-console
+          console.log('Resposta Pós Attachment', data)
+        })
+        .catch(err => console.error(err))
+    }
+
+  }, [orderForm, productContext, skuItems])
 
   /*
    * If text is an empty string it should render the default message
