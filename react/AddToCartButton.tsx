@@ -148,9 +148,7 @@ function AddToCartButton(props: Props) {
   const translateMessage = (message: MessageDescriptor) =>
     intl.formatMessage(message)
 
-
-
-  console.log(productContext, 'productContext')
+  //console.log(productContext, 'productContext')
 
   // collect toast and fake loading delay timers
   const timers = useRef<Record<string, number | undefined>>({})
@@ -174,7 +172,6 @@ function AddToCartButton(props: Props) {
       )
     }
   }, [isFakeLoading, isOneClickBuy])
-
 
   const resolveToastMessage = (success: boolean) => {
     if (!success) return translateMessage(messages.error)
@@ -222,14 +219,14 @@ function AddToCartButton(props: Props) {
     const pixelEvent =
       customPixelEventId && addToCartFeedback === 'customEvent'
         ? {
-          id: customPixelEventId,
-          event: 'addToCart',
-          items: pixelEventItems,
-        }
+            id: customPixelEventId,
+            event: 'addToCart',
+            items: pixelEventItems,
+          }
         : {
-          event: 'addToCart',
-          items: pixelEventItems,
-        }
+            event: 'addToCart',
+            items: pixelEventItems,
+          }
 
     // @ts-expect-error the event is not typed in pixel-manager
     push(pixelEvent)
@@ -258,12 +255,9 @@ function AddToCartButton(props: Props) {
     if (promptOnCustomEvent === 'addToCart' && showInstallPrompt) {
       showInstallPrompt()
     }
-
   }
 
-
   const handleClick = (e: React.MouseEvent) => {
-
     if (productContextDispatch) {
       productContextDispatch({
         type: 'SET_BUY_BUTTON_CLICKED',
@@ -283,21 +277,42 @@ function AddToCartButton(props: Props) {
 
   useEffect(() => {
     handleAttachment()
-    console.log('Attachment Executado', orderForm)
+    //console.log('Attachment Executado', orderForm)
   }, [orderForm.items])
 
   const handleAttachment = useCallback(async () => {
-    const attachmentParams = sessionStorage.getItem('Bordado')
+    const attachmentParamsGet: any = sessionStorage.getItem('Bordado')
+    const attachmentParamsObj: any = JSON.parse(attachmentParamsGet)
 
-    //TODO: Maybe this will not work as expected  
+    const attachmentParamsArr: any = []
+
+    attachmentParamsObj.map((item: any) => {
+      for (let key in item) {
+        attachmentParamsArr.push(
+          `${key} - Nome: ${item[key].Nome} | Posição: ${item[key].Posição} | Cor: ${item[key].Cor} | Estilo: ${item[key].Estilo}`
+        )
+      }
+    })
+
+    const attachmentParams = attachmentParamsArr.join(', ')
+
+    //console.log(attachmentParams, 'attachmentParams')
+
+    //TODO: Maybe this will not work as expected
     const itemIndex = orderForm.items.findIndex(
       (item: any) => item.id === skuItems[0].id
     )
 
-    /* @ts-ignore */
-    const haveAttachment = productContext?.selectedItem?.attachments?.find(item => item.name === "Bordado")
+    //console.log(skuItems, 'skuItemssssssssssssssss')
 
-    console.log(orderForm.items[itemIndex], 'orderForm.items[itemIndex]')
+    //console.log(itemIndex, 'itemIndex')
+
+    /* @ts-ignore */
+    const haveAttachment = productContext?.selectedItem?.attachments?.find(
+      (item: { name: string }) => item.name === 'Bordado'
+    )
+
+    //console.log(orderForm.items[itemIndex], 'orderForm.items[itemIndex]')
 
     if (attachmentParams && haveAttachment) {
       fetch(
@@ -330,14 +345,14 @@ function AddToCartButton(props: Props) {
           }),
         }
       )
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
           // eslint-disable-next-line no-console
-          console.log('Resposta Pós Attachment', data)
+          if (response.status === 200) {
+            sessionStorage.removeItem('Bordado')
+          }
         })
         .catch(err => console.error(err))
     }
-
   }, [orderForm, productContext, skuItems])
 
   /*
